@@ -1,0 +1,51 @@
+from mcpi import minecraft
+from picamera import PiCamera
+from time import sleep
+from datetime import datetime
+from twython import Twython
+from auth import (
+    consumer_key,
+    consumer_secret,
+    access_token,
+    access_token_secret
+)
+
+twitter = Twython(
+    consumer_key,
+    consumer_secret,
+    access_token,
+    access_token_secret
+)
+
+
+def take_the_pic():
+    with PiCamera() as camera:
+        timestamp = datetime.now().isoformat()
+        photo_path = '/home/pi/Test projects/selfie%s.jpg' % timestamp
+        camera.start_preview()
+        sleep(3)
+        camera.capture(photo_path)
+
+    message = "Minecraft photobooth selfie"
+    with open(photo_path, 'rb') as photo:
+        twitter.update_status_with_media(status=message, media=photo)
+    print("Tweeted: %s" % message)
+
+                    
+mc = minecraft.Minecraft.create()
+mc.postToChat("Find the photobooth!")
+
+while True:
+    x, y, z = mc.player.getPos()
+
+    sleep(3)
+
+    if x>= -11.7 and y == 7.0 and z == -22.7:
+
+        mc.postToChat("You are in the photobooth!")
+        sleep(1)
+        mc.postToChat("Smile!")
+        sleep(1)
+        take_the_pic()
+        mc.postToChat("Check out your picture!")
+        break 
